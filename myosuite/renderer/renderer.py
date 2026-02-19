@@ -13,13 +13,10 @@
 # limitations under the License.
 
 """Rendering API for MuJoCo simulations."""
-from __future__ import annotations
 
 import abc
 import enum
 from typing import Any, Optional, Sequence, Union
-
-import mujoco
 
 import numpy as np
 
@@ -35,7 +32,7 @@ class RenderMode(enum.Enum):
 class Renderer(abc.ABC):
     """Base interface for rendering simulations."""
 
-    def __init__(self, mj_model: mujoco.MjModel, mj_data: mujoco.MjData) -> None:
+    def __init__(self, mj_model, mj_data):
         """Initializes a new renderer.
 
         Args:
@@ -48,11 +45,11 @@ class Renderer(abc.ABC):
         self._viewer_settings = {}
 
     @abc.abstractmethod
-    def render_to_window(self) -> None:
+    def render_to_window(self):
         """Renders the simulation to a window."""
 
     @abc.abstractmethod
-    def refresh_window(self) -> None:
+    def refresh_window(self):
         """Refreshes the rendered window if one is present."""
 
     @abc.abstractmethod
@@ -81,12 +78,12 @@ class Renderer(abc.ABC):
 
     def set_free_camera_settings(
         self,
-        distance: float | None = None,
-        azimuth: float | None = None,
-        elevation: float | None = None,
-        lookat: Sequence[float] | None = None,
+        distance: Optional[float] = None,
+        azimuth: Optional[float] = None,
+        elevation: Optional[float] = None,
+        lookat: Sequence[float] = None,
         center: bool = True,
-    ) -> None:
+    ):
         """Sets the free camera parameters.
 
         Args:
@@ -117,9 +114,9 @@ class Renderer(abc.ABC):
 
     def set_viewer_settings(
         self,
-        render_tendon: bool | None = None,
-        render_actuator: bool | None = None,
-    ) -> None:
+        render_tendon: Optional[float] = None,
+        render_actuator: Optional[float] = None,
+    ):
         """Sets the viewer parameters.
 
         Args:
@@ -134,10 +131,10 @@ class Renderer(abc.ABC):
 
         self._viewer_settings = viewer_settings
 
-    def close(self) -> None:
+    def close(self):
         """Cleans up any resources being used by the renderer."""
 
-    def _update_camera_properties(self, camera: Any) -> None:
+    def _update_camera_properties(self, camera: Any):
         """Updates the given camera object with the current camera settings."""
         for key, value in self._camera_settings.items():
             if key == "lookat":
@@ -145,6 +142,6 @@ class Renderer(abc.ABC):
             else:
                 setattr(camera, key, value)
 
-    def __del__(self) -> None:
+    def __del__(self):
         """Automatically clean up when out of scope."""
         self.close()

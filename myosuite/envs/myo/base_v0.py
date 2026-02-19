@@ -2,10 +2,8 @@
 # Copyright (c) MyoSuite Authors
 Authors  :: Vikash Kumar (vikashplus@gmail.com), Vittorio Caggiano (caggiano@gmail.com)
 ================================================="""
-from __future__ import annotations
 
 import logging
-from typing import Any
 
 import mujoco
 import numpy as np
@@ -24,15 +22,15 @@ class BaseV0(env_base.MujocoEnv):
 
     def _setup(
         self,
-        obs_keys: list[str],
-        weighted_reward_keys: dict[str, float],
-        sites: list[str] | None = None,
-        frame_skip: int = 10,
-        muscle_condition: str = "",
-        fatigue_reset_vec: np.ndarray | None = None,
-        fatigue_reset_random: bool = False,
-        **kwargs: Any,
-    ) -> None:
+        obs_keys: list,
+        weighted_reward_keys: dict,
+        sites: list = None,
+        frame_skip=10,
+        muscle_condition="",
+        fatigue_reset_vec=None,
+        fatigue_reset_random=False,
+        **kwargs,
+    ):
         if self.mj_model.na > 0 and "act" not in obs_keys:
             obs_keys = (
                 obs_keys.copy()
@@ -60,7 +58,7 @@ class BaseV0(env_base.MujocoEnv):
         )
         self.viewer_setup(azimuth=90, distance=1.5, render_actuator=True)
 
-    def initializeConditions(self) -> None:
+    def initializeConditions(self):
         # for muscle weakness we assume that a weaker muscle has a
         # reduced maximum force
         if self.muscle_condition == "sarcopenia":
@@ -82,7 +80,7 @@ class BaseV0(env_base.MujocoEnv):
             self.EIPpos = self.mj_model.actuator("EIP").id
 
     # step the simulation forward
-    def step(self, a: np.ndarray, **kwargs: Any) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def step(self, a, **kwargs):
         muscle_a = a.copy()
         muscle_act_ind = self.mj_model.actuator_dyntype == mujoco.mjtDyn.mjDYN_MUSCLE
         # Explicitely project normalized space (-1,1) to actuator space (0,1) if muscles
@@ -120,7 +118,7 @@ class BaseV0(env_base.MujocoEnv):
 
         return self.forward(**kwargs)
 
-    def reset(self, fatigue_reset: bool = True, *args: Any, **kwargs: Any) -> Any:
+    def reset(self, fatigue_reset=True, *args, **kwargs):
         if fatigue_reset:
             if self.muscle_condition == "fatigue":
                 self.muscle_fatigue.reset(
@@ -132,7 +130,7 @@ class BaseV0(env_base.MujocoEnv):
 
         return super().reset(*args, **kwargs)
 
-    def set_fatigue_reset_random(self, fatigue_reset_random: bool) -> None:  #
+    def set_fatigue_reset_random(self, fatigue_reset_random):  #
         if self.muscle_condition != "fatigue":
             logging.warning("This has no effect, as no fatigue model is provided.")
         self.fatigue_reset_random = fatigue_reset_random

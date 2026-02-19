@@ -5,15 +5,13 @@ Source  :: https://github.com/vikashplus/robohive
 License :: Under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 ================================================= """
 
-from __future__ import annotations
-
 import numpy as np
 # For testing whether a number is close to zero
 _FLOAT_EPS = np.finfo(np.float64).eps
 _EPS4 = _FLOAT_EPS * 4.0
 
 
-def mulQuat(qa: np.ndarray, qb: np.ndarray) -> np.ndarray:
+def mulQuat(qa, qb):
     res = np.zeros(4)
     res[0] = qa[0]*qb[0] - qa[1]*qb[1] - qa[2]*qb[2] - qa[3]*qb[3]
     res[1] = qa[0]*qb[1] + qa[1]*qb[0] + qa[2]*qb[3] - qa[3]*qb[2]
@@ -21,32 +19,32 @@ def mulQuat(qa: np.ndarray, qb: np.ndarray) -> np.ndarray:
     res[3] = qa[0]*qb[3] + qa[1]*qb[2] - qa[2]*qb[1] + qa[3]*qb[0]
     return res
 
-def negQuat(quat: np.ndarray) -> np.ndarray:
+def negQuat(quat):
     return np.array([quat[0], -quat[1], -quat[2], -quat[3]])
 
-def quat2Vel(quat: np.ndarray, dt: np.ndarray = 1) -> tuple[float, np.ndarray]:
+def quat2Vel(quat, dt=1):
     axis = quat[1:].copy()
     sin_a_2 = np.sqrt(np.sum(axis**2))
     axis = axis/(sin_a_2+1e-8)
     speed = 2*np.arctan2(sin_a_2, quat[0])/dt
     return speed, axis
 
-def diffQuat(quat1: np.ndarray, quat2: np.ndarray) -> np.ndarray:
+def diffQuat(quat1, quat2):
     neg = negQuat(quat1)
     diff = mulQuat(quat2, neg)
     return diff
 
-def quatDiff2Vel(quat1: np.ndarray, quat2: np.ndarray, dt: np.ndarray) -> tuple[float, np.ndarray]:
+def quatDiff2Vel(quat1, quat2, dt):
     diff = diffQuat(quat1, quat2)
     return quat2Vel(diff, dt)
 
 
-def axis_angle2quat(axis: np.ndarray, angle: float) -> np.ndarray:
+def axis_angle2quat(axis, angle):
     c = np.cos(angle/2)
     s = np.sin(angle/2)
     return np.array([c, s*axis[0], s*axis[1], s*axis[2]])
 
-def euler2mat(euler: np.ndarray) -> np.ndarray:
+def euler2mat(euler):
     """ Convert Euler Angles to Rotation Matrix """
     euler = np.asarray(euler, dtype=np.float64)
     assert euler.shape[-1] == 3, "Invalid shaped euler {}".format(euler)
@@ -70,7 +68,7 @@ def euler2mat(euler: np.ndarray) -> np.ndarray:
     return mat
 
 
-def euler2quat(euler: np.ndarray) -> np.ndarray:
+def euler2quat(euler):
     """ Convert Euler Angles to Quaternions """
     euler = np.asarray(euler, dtype=np.float64)
     assert euler.shape[-1] == 3, "Invalid shape euler {}".format(euler)
@@ -89,7 +87,7 @@ def euler2quat(euler: np.ndarray) -> np.ndarray:
     return quat
 
 
-def mat2euler(mat: np.ndarray) -> np.ndarray:
+def mat2euler(mat):
     """ Convert Rotation Matrix to Euler Angles """
     mat = np.asarray(mat, dtype=np.float64)
     assert mat.shape[-2:] == (3, 3), "Invalid shape matrix {}".format(mat)
@@ -109,7 +107,7 @@ def mat2euler(mat: np.ndarray) -> np.ndarray:
     return euler
 
 
-def mat2quat(mat: np.ndarray) -> np.ndarray:
+def mat2quat(mat):
     """ Convert Rotation Matrix to Quaternion """
     mat = np.asarray(mat, dtype=np.float64)
     assert mat.shape[-2:] == (3, 3), "Invalid shape matrix {}".format(mat)
@@ -146,12 +144,12 @@ def mat2quat(mat: np.ndarray) -> np.ndarray:
     return q
 
 
-def quat2euler(quat: np.ndarray) -> np.ndarray:
+def quat2euler(quat):
     """ Convert Quaternion to Euler Angles """
     return mat2euler(quat2mat(quat))
 
 
-def quat2mat(quat: np.ndarray) -> np.ndarray:
+def quat2mat(quat):
     """ Convert Quaternion to Euler Angles """
     quat = np.asarray(quat, dtype=np.float64)
     assert quat.shape[-1] == 4, "Invalid shape quat {}".format(quat)
@@ -179,7 +177,7 @@ def quat2mat(quat: np.ndarray) -> np.ndarray:
 
 
 # multiply vector by 3D rotation matrix transpose
-def rotVecMatT(vec: np.ndarray, mat: np.ndarray) -> np.ndarray:
+def rotVecMatT(vec, mat):
     return np.array([
         mat[0,0]*vec[0] + mat[1,0]*vec[1] + mat[2,0]*vec[2],
         mat[0,1]*vec[0] + mat[1,1]*vec[1] + mat[2,1]*vec[2],
@@ -187,7 +185,7 @@ def rotVecMatT(vec: np.ndarray, mat: np.ndarray) -> np.ndarray:
         ])
 
 # multiply vector by 3D rotation matrix
-def rotVecMat(vec: np.ndarray, mat: np.ndarray) -> np.ndarray:
+def rotVecMat(vec, mat):
     return np.array([
         mat[0,0]*vec[0] + mat[0,1]*vec[1] + mat[0,2]*vec[2],
         mat[1,0]*vec[0] + mat[1,1]*vec[1] + mat[1,2]*vec[2],
@@ -195,11 +193,11 @@ def rotVecMat(vec: np.ndarray, mat: np.ndarray) -> np.ndarray:
         ])
 
 # multiply vector by quat
-def rotVecQuat(vec: np.ndarray, quat: np.ndarray) -> np.ndarray:
+def rotVecQuat(vec, quat):
     mat = quat2mat(quat)
     return rotVecMat(vec,mat)
 
-def quat2euler_intrinsic(quat: np.ndarray) -> np.ndarray:
+def quat2euler_intrinsic(quat):
     """
     Math func: Intrinsic Euler angles, for euler in body coordinate frame
     """
@@ -231,7 +229,7 @@ def quat2euler_intrinsic(quat: np.ndarray) -> np.ndarray:
 
     return np.array([roll, pitch, yaw])
 
-def intrinsic_euler2quat(euler: np.ndarray) -> np.ndarray:
+def intrinsic_euler2quat(euler):
     """
     Math func: Intrinsic Euler angles (roll, pitch, yaw format) to Quat
     """

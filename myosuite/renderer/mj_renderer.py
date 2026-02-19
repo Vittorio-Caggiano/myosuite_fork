@@ -6,10 +6,9 @@ License :: Under Apache License, Version 2.0 (the "License"); you may not use th
 ================================================="""
 
 """Rendering simulation using mujoco."""
-from __future__ import annotations
 
 import time
-from typing import Any, Union
+from typing import Union
 
 import mujoco
 import numpy as np

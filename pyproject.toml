@@ -62,15 +62,8 @@ dev = [
     "black",
     "isort",
     "flake8",
-    "mypy>=1.0",
 ]
 
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-ignore_missing_imports = true
-exclude = ["myosuite/agents/", "myosuite/tests/"]
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]
@@ -81,7 +74,7 @@ packages = { find = { exclude = ["myosuite.agents"] } }
 py-modules = ["myosuite_init"]
 
 [tool.setuptools.package-data]
-"myosuite" = ["**/*", "py.typed"]
+"myosuite" = ["**/*"]
 
 [project.scripts]
 myoapi_init = "myosuite_init:fetch_simhive"

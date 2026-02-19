@@ -4,12 +4,11 @@ Author  :: Vikash Kumar (vikashplus@gmail.com)
 Source  :: https://github.com/vikashplus/robohive
 License :: Under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 ================================================="""
-from __future__ import annotations
 
 import os
 import time as timer
 from sys import platform
-from typing import Any, Callable, Optional
+from typing import Optional
 
 import mujoco
 import numpy as np
@@ -44,12 +43,12 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     def __init__(
         self,
-        model_path: str | mujoco.MjModel,
-        obsd_model_path: str | mujoco.MjModel | None = None,
-        seed: int | None = None,
-        edit_fn: Callable | None = None,
-        env_credits: str = DEFAULT_CREDIT,
-    ) -> None:
+        model_path,
+        obsd_model_path=None,
+        seed=None,
+        edit_fn=None,
+        env_credits=DEFAULT_CREDIT,
+    ):
         """
         Create a gym env
         INPUTS:
@@ -95,7 +94,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
         ObsVecDict.__init__(self)
 
-    def _get_spec(self, model_path: str, edit_fn: Callable | None) -> mujoco.MjSpec:
+    def _get_spec(self, model_path, edit_fn):
         if edit_fn is not None:
             # Load the model
             model_editor = ModelEditor(model_path)
@@ -109,21 +108,21 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     def _setup(
         self,
-        obs_keys: list[str],  # Keys from obs_dict that forms the obs vector returned by get_obs()
-        weighted_reward_keys: dict[str, float],  # Keys and weight that sums up to build the reward
-        proprio_keys: list[str] | None = None,  # Keys from obs_dict that forms the proprioception vector returned by get_proprio()
-        visual_keys: list[str] | None = None,  # Keys that specify visual_dict returned by get_visual()
+        obs_keys: dict,  # Keys from obs_dict that forms the obs vector returned by get_obs()
+        weighted_reward_keys: dict,  # Keys and weight that sums up to build the reward
+        proprio_keys: list = None,  # Keys from obs_dict that forms the proprioception vector returned by get_proprio()
+        visual_keys: list = None,  # Keys that specify visual_dict returned by get_visual()
         reward_mode: str = "dense",  # Configure env to return dense/sparse rewards
         frame_skip: int = 1,  # Number of mujoco frames/steps per env step
         normalize_act: bool = True,  # Ask env to normalize the action space
-        obs_range: tuple[float, float] = (
+        obs_range: tuple = (
             -10,
             10,
         ),  # Permissible range of values in obs vector returned by get_obs()
         rwd_viz: bool = False,  # Visualize rewards (WIP, needs vtils)
         device_id: int = 0,  # Device id for rendering
-        **kwargs: Any,  # Additional arguments
-    ) -> None:
+        **kwargs,  # Additional arguments
+    ):
 
         if self.mj_model is None or self.mj_data is None:
             raise TypeError(
@@ -221,7 +220,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
         return
 
-    def _setup_rgb_encoders(self, visual_keys: list[str] | None, device: str | None = None) -> None:
+    def _setup_rgb_encoders(self, visual_keys, device=None):
         """
         Setup the supported visual encoders: 1d /2d / r3m18/ r3m34/ r3m50
         """
@@ -376,7 +375,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
                         ]
                     )
 
-    def step(self, a: np.ndarray, **kwargs: Any) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def step(self, a, **kwargs):
         """
         Step the simulation forward (t => t+1)
         Uses robot interface to safely step the forward respecting pos/ vel limits
@@ -393,22 +392,22 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         return self.forward(**kwargs)
 
     @implement_for("gym", None, "0.24")
-    def forward(self, **kwargs: Any) -> tuple[np.ndarray, float, bool, dict[str, Any]]:
+    def forward(self, **kwargs):
         return self._forward(**kwargs)
 
     @implement_for("gym", "0.24", None)
-    def forward(self, **kwargs: Any) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def forward(self, **kwargs):
         obs, reward, done, info = self._forward(**kwargs)
         terminal = done
         return obs, reward, terminal, False, info
 
     @implement_for("gymnasium")
-    def forward(self, **kwargs: Any) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+    def forward(self, **kwargs):
         obs, reward, done, info = self._forward(**kwargs)
         terminal = done
         return obs, reward, terminal, False, info
 
-    def _forward(self, **kwargs: Any) -> tuple[np.ndarray, float, bool, dict[str, Any]]:
+    def _forward(self, **kwargs):
         """
         Forward propagate env to recover env details
         Returns current obs(t), rwd(t), done(t), info(t)
@@ -433,7 +432,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         # returns obs(t+1), rwd(t+1), done(t+1), info(t+1)
         return obs, env_info["rwd_" + self.rwd_mode], bool(env_info["done"]), env_info
 
-    def get_obs(self, update_proprioception: bool = True, update_exteroception: bool = False) -> np.ndarray:
+    def get_obs(self, update_proprioception=True, update_exteroception=False):
         """
         Get state based observations from the environemnt.
         Uses robot to get sensors, reconstructs the sim and recovers the sensors.
@@ -553,7 +552,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
         return visual_dict
 
-    def get_proprioception(self, obs_dict: dict[str, np.ndarray] | None = None) -> tuple[np.ndarray | None, np.ndarray | None, dict[str, np.ndarray] | None]:
+    def get_proprioception(self, obs_dict=None) -> dict:
         """
         Get robot proprioception data. Usually incudes robot's onboard kinesthesia sensors (pos, vel, accn, etc)
         """
@@ -574,14 +573,14 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
         return proprio_dict["time"], proprio_vec, proprio_dict
 
-    def get_exteroception(self, **kwargs: Any) -> dict[str, Any] | None:
+    def get_exteroception(self, **kwargs) -> dict:
         """
         Get robot exteroception data. Usually incudes robot's onboard (visual, tactile, acoustic) sensors
         """
         return self.get_visuals(**kwargs)
 
     # VIK??? Its getting called twice for mjrl agent. Once in step and sampler calls it as well
-    def get_env_infos(self) -> dict[str, Any]:
+    def get_env_infos(self):
         """
         Get information about the environment.
         - NOTE: Returned dict contains pointers that will be updated by the env. Deepcopy returned data if you want it to persist
@@ -614,7 +613,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         }
         return env_info
 
-    def seed(self, seed: int | None = None) -> list[int]:
+    def seed(self, seed=None):
         """
         Set random number seed
         """
@@ -622,10 +621,10 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         self.np_random, seed = seed_envs(seed)
         return [seed]
 
-    def get_input_seed(self) -> int | None:
+    def get_input_seed(self):
         return self.input_seed
 
-    def _reset(self, reset_qpos: np.ndarray | None = None, reset_qvel: np.ndarray | None = None, seed: int | None = None, **kwargs: Any) -> np.ndarray:
+    def _reset(self, reset_qpos=None, reset_qvel=None, seed=None, **kwargs):
         """
         Reset the environment (Default implemention provided).
         Override if env needs custom reset. Carefully handle return type for gym/gymnasium compatibility
@@ -636,15 +635,15 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         return self.get_obs()
 
     @implement_for("gym", None, "0.26")
-    def reset(self, reset_qpos: np.ndarray | None = None, reset_qvel: np.ndarray | None = None, **kwargs: Any) -> np.ndarray:
+    def reset(self, reset_qpos=None, reset_qvel=None, **kwargs):
         return self._reset(reset_qpos=reset_qpos, reset_qvel=reset_qvel, **kwargs)
 
     @implement_for("gym", "0.26", None)
-    def reset(self, reset_qpos: np.ndarray | None = None, reset_qvel: np.ndarray | None = None, **kwargs: Any) -> tuple[np.ndarray, dict[str, Any]]:
+    def reset(self, reset_qpos=None, reset_qvel=None, **kwargs):
         return self._reset(reset_qpos=reset_qpos, reset_qvel=reset_qvel, **kwargs), {}
 
     @implement_for("gymnasium")
-    def reset(self, reset_qpos: np.ndarray | None = None, reset_qvel: np.ndarray | None = None, seed: int | None = None, **kwargs: Any) -> tuple[np.ndarray, dict[str, Any]]:
+    def reset(self, reset_qpos=None, reset_qvel=None, seed=None, **kwargs):
         return (
             self._reset(
                 reset_qpos=reset_qpos, reset_qvel=reset_qvel, seed=seed, **kwargs
@@ -657,34 +656,34 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
     #     return self.step(a)
 
     @property
-    def dt(self) -> float:
+    def dt(self):
         return self.mj_model.opt.timestep * self.frame_skip
 
     @property
-    def time(self) -> float:
+    def time(self):
         return self.obsd_mj_data.time
 
     @property
-    def id(self) -> str:
+    def id(self):
         return self.spec.id
 
     @implement_for("gym")
-    def _horizon(self) -> int:
+    def _horizon(self):
         return (
             self.spec.max_episode_steps
         )  # paths could have early termination before horizon
 
     @implement_for("gymnasium")
-    def _horizon(self) -> int:
+    def _horizon(self):
         return gym_registry_specs()[
             self.spec.id
         ].max_episode_steps  # gymnasium unwrapper overrides specs (https://github.com/Farama-Foundation/Gymnasium/issues/871)
 
     @property
-    def horizon(self) -> int:
+    def horizon(self):
         return self._horizon()
 
-    def get_env_state(self) -> dict[str, Any]:
+    def get_env_state(self):
         """
         Get full state of the environemnt
         Default implemention provided. Override if env has custom state
@@ -716,7 +715,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
             body_quat=body_quat,
         )
 
-    def set_env_state(self, state_dict: dict[str, Any]) -> None:
+    def set_env_state(self, state_dict):
         """
         Set full state of the environemnt
         Default implemention provided. Override if env has custom state
@@ -759,7 +758,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     # Methods on paths (should it be a part of path_utils?) =================================
 
-    def compute_path_rewards(self, paths: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def compute_path_rewards(self, paths):
         """
         Compute vectorized rewards for paths and check for done conditions
         path has two keys: observations and actions
@@ -778,7 +777,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         paths["rewards"] = rewards if rewards.shape[0] > 1 else rewards.ravel()
         return paths
 
-    def truncate_paths(self, paths: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def truncate_paths(self, paths):
         """
         truncate paths as per done condition
         """
@@ -794,7 +793,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
                 path["terminated"] = True
         return paths
 
-    def evaluate_success(self, paths: list[dict[str, Any]], logger: Any | None = None, successful_steps: int = 5) -> float:
+    def evaluate_success(self, paths, logger=None, successful_steps=5):
         """
         Evaluate paths and log metrics to logger
         """
@@ -824,7 +823,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     # Vizualization utilities ================================================
 
-    def mj_render(self) -> None:
+    def mj_render(self):
         """
         Render the default camera
         """
@@ -832,13 +831,13 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     def viewer_setup(
         self,
-        distance: float = 2.5,
-        azimuth: float = 90,
-        elevation: float = -30,
-        lookat: np.ndarray | None = None,
-        render_actuator: bool | None = None,
-        render_tendon: bool | None = None,
-    ) -> None:
+        distance=2.5,
+        azimuth=90,
+        elevation=-30,
+        lookat=None,
+        render_actuator=None,
+        render_tendon=None,
+    ):
         """
         Setup the default camera
         """
@@ -852,17 +851,17 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
     # Methods on policy (should it be a part of utils?) =================================
     def examine_policy(
         self,
-        policy: Any,
-        horizon: int = 1000,
-        num_episodes: int = 1,
-        mode: str = "exploration",  # options: exploration/evaluation
-        render: str | None = None,  # options: onscreen/offscreen/none
-        camera_name: str | None = None,
-        frame_size: tuple[int, int] = (640, 480),
-        output_dir: str = "/tmp/",
-        filename: str = "newvid",
+        policy,
+        horizon=1000,
+        num_episodes=1,
+        mode="exploration",  # options: exploration/evaluation
+        render=None,  # options: onscreen/offscreen/none
+        camera_name=None,
+        frame_size=(640, 480),
+        output_dir="/tmp/",
+        filename="newvid",
         device_id: int = 0,
-    ) -> list[dict[str, Any]]:
+    ):
         """
         Examine a policy for behaviors;
         - either onscreen, or offscreen, or just rollout without rendering.
@@ -957,17 +956,17 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     def examine_policy_new(
         self,
-        policy: Any,
-        horizon: int = 1000,
-        num_episodes: int = 1,
-        mode: str = "exploration",  # options: exploration/evaluation
-        render: str | None = None,  # options: onscreen/offscreen/none
-        camera_name: str | None = None,
-        frame_size: tuple[int, int] = (640, 480),
-        output_dir: str = "/tmp/",
-        filename: str = "newvid",
+        policy,
+        horizon=1000,
+        num_episodes=1,
+        mode="exploration",  # options: exploration/evaluation
+        render=None,  # options: onscreen/offscreen/none
+        camera_name=None,
+        frame_size=(640, 480),
+        output_dir="/tmp/",
+        filename="newvid",
         device_id: int = 0,
-    ) -> Any:
+    ):
         """
         Examine a policy for behaviors;
         - either onscreen, or offscreen, or just rollout without rendering.
@@ -1083,7 +1082,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
 
     # methods to override ====================================================
 
-    def get_obs_dict(self, mj_model: mujoco.MjModel, mj_data: mujoco.MjData) -> dict[str, np.ndarray]:
+    def get_obs_dict(self, mj_model, mj_data):
         """
         Get observation dictionary
         Implement this in each subclass.
@@ -1093,7 +1092,7 @@ class MujocoEnv(gym.Env, gym.utils.EzPickle, ObsVecDict):
         """
         raise NotImplementedError
 
-    def get_reward_dict(self, obs_dict: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+    def get_reward_dict(self, obs_dict):
         """
         Compute rewards dictionary
         Implement this in each subclass.
