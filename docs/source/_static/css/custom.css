@@ -199,26 +199,43 @@ a:hover {
 
 /* ===== Tables ===== */
 /*
- * RTD wraps tables in .wy-table-responsive, so we target both the bare
- * table.docutils selector and the wrapper variant.  We also set background
- * directly on <th>/<td> cells (not just on <thead>) because CSS background
- * inheritance stops at cells in most browsers when the theme has cell-level
- * overrides.
+ * Three layers of selectors to survive the RTD theme's cascade:
+ *
+ * 1. th.head — docutils marks every header cell with this class (simple
+ *    tables, grid tables).  Specificity 0,2,1 beats plain "thead th" 0,1,2.
+ *
+ * 2. body … thead th/td — body prefix boosts specificity of the structural
+ *    selector so it beats same-weight RTD !important rules that load later.
+ *
+ * 3. thead th/td p — RTD sometimes wraps cell content in <p>.  Direct rules
+ *    on <p> win over inherited colour from the parent <th>, so we must target
+ *    the <p> explicitly.
+ *
+ * Both .wy-table-responsive wrapper and bare table.docutils variants are
+ * covered so the rules fire regardless of how the theme rewrites the DOM.
  */
-.rst-content table.docutils thead,
-.rst-content .wy-table-responsive table thead {
-  background: var(--myo-dark-teal);
-}
 
-.rst-content table.docutils thead th,
-.rst-content table.docutils thead td,
-.rst-content .wy-table-responsive table thead th,
-.rst-content .wy-table-responsive table thead td {
+/* — Header cells ---------------------------------------------------------- */
+body .rst-content table th.head,
+body .rst-content table.docutils thead th,
+body .rst-content table.docutils thead td,
+body .rst-content .wy-table-responsive table thead th,
+body .rst-content .wy-table-responsive table thead td {
   background-color: var(--myo-dark-teal) !important;
   color: #fff !important;
   border-color: rgba(200, 236, 230, 0.3) !important;
 }
 
+/* — Paragraphs inside header cells (RTD injects <p> in some versions) ----- */
+body .rst-content table th.head p,
+body .rst-content table.docutils thead th p,
+body .rst-content table.docutils thead td p,
+body .rst-content .wy-table-responsive table thead th p,
+body .rst-content .wy-table-responsive table thead td p {
+  color: #fff !important;
+}
+
+/* — Alternating body rows ------------------------------------------------- */
 .rst-content table.docutils tbody tr:nth-child(even),
 .rst-content .wy-table-responsive table tbody tr:nth-child(even) {
   background: var(--myo-mint);
@@ -229,6 +246,7 @@ a:hover {
   background: #fff;
 }
 
+/* — Body cells ------------------------------------------------------------ */
 .rst-content table.docutils td,
 .rst-content .wy-table-responsive table td {
   color: var(--myo-dark) !important;
