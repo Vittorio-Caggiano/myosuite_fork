@@ -198,29 +198,45 @@ a:hover {
 }
 
 /* ===== Tables ===== */
-.rst-content table.docutils thead {
+/*
+ * RTD wraps tables in .wy-table-responsive, so we target both the bare
+ * table.docutils selector and the wrapper variant.  We also set background
+ * directly on <th>/<td> cells (not just on <thead>) because CSS background
+ * inheritance stops at cells in most browsers when the theme has cell-level
+ * overrides.
+ */
+.rst-content table.docutils thead,
+.rst-content .wy-table-responsive table thead {
   background: var(--myo-dark-teal);
 }
 
-.rst-content table.docutils thead th {
+.rst-content table.docutils thead th,
+.rst-content table.docutils thead td,
+.rst-content .wy-table-responsive table thead th,
+.rst-content .wy-table-responsive table thead td {
+  background-color: var(--myo-dark-teal) !important;
   color: #fff !important;
-  border-color: rgba(200, 236, 230, 0.3);
+  border-color: rgba(200, 236, 230, 0.3) !important;
 }
 
-.rst-content table.docutils tbody tr:nth-child(even) {
+.rst-content table.docutils tbody tr:nth-child(even),
+.rst-content .wy-table-responsive table tbody tr:nth-child(even) {
   background: var(--myo-mint);
 }
 
-.rst-content table.docutils tbody tr:nth-child(odd) {
+.rst-content table.docutils tbody tr:nth-child(odd),
+.rst-content .wy-table-responsive table tbody tr:nth-child(odd) {
   background: #fff;
 }
 
-.rst-content table.docutils td {
-  color: var(--myo-dark);
+.rst-content table.docutils td,
+.rst-content .wy-table-responsive table td {
+  color: var(--myo-dark) !important;
   border-color: var(--myo-light) !important;
 }
 
-.rst-content table.docutils th {
+.rst-content table.docutils th,
+.rst-content .wy-table-responsive table th {
   border-color: var(--myo-light) !important;
 }
 
