@@ -1,0 +1,236 @@
+/*
+ * MyoSuite Documentation — Custom Theme
+ * Color palette derived from the MyoSuite logo
+ */
+
+/* ===== Palette ===== */
+:root {
+  --myo-dark:      #060e0d;
+  --myo-dark-teal: #155257;
+  --myo-teal:      #3caaaa;
+  --myo-medium:    #83c8c0;
+  --myo-light:     #bee1dc;
+  --myo-mint:      #e6f5f0;
+  --myo-stroke:    #c8ece6;
+}
+
+/* ===== Sidebar ===== */
+.wy-side-nav-search {
+  background: var(--myo-dark-teal) !important;
+}
+
+.wy-side-nav-search input[type="text"] {
+  border: 1px solid var(--myo-medium);
+  border-radius: 3px;
+}
+
+.wy-side-nav-search input[type="text"]:focus {
+  border-color: var(--myo-teal);
+  box-shadow: 0 0 0 2px rgba(60, 170, 170, 0.25);
+}
+
+.wy-nav-side {
+  background: var(--myo-dark-teal) !important;
+}
+
+.wy-side-nav-search > a img.logo {
+  max-width: 200px;
+}
+
+/* ===== Sidebar navigation links ===== */
+.wy-menu-vertical a {
+  color: var(--myo-stroke) !important;
+}
+
+.wy-menu-vertical a:hover {
+  background: rgba(60, 170, 170, 0.15) !important;
+  color: #fff !important;
+}
+
+.wy-menu-vertical li.current > a {
+  background: rgba(60, 170, 170, 0.22) !important;
+  border-right: 3px solid var(--myo-teal);
+  color: #fff !important;
+}
+
+.wy-menu-vertical li.current a:hover {
+  background: rgba(60, 170, 170, 0.3) !important;
+}
+
+.wy-menu-vertical li.toctree-l1.current > a {
+  border-bottom: 1px solid rgba(200, 236, 230, 0.12);
+}
+
+.wy-menu-vertical li.on a,
+.wy-menu-vertical li.current > a {
+  background: rgba(60, 170, 170, 0.18) !important;
+}
+
+.wy-menu-vertical p.caption {
+  color: var(--myo-medium) !important;
+}
+
+/* ===== Content area links ===== */
+.rst-content a,
+.rst-content a:visited,
+a {
+  color: var(--myo-teal);
+}
+
+.rst-content a:hover,
+a:hover {
+  color: var(--myo-medium);
+}
+
+/* ===== Headings ===== */
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4 {
+  color: var(--myo-dark-teal);
+}
+
+.rst-content h1 {
+  border-bottom: 2px solid var(--myo-light);
+  padding-bottom: 0.3em;
+}
+
+.rst-content h2 {
+  border-bottom: 1px solid var(--myo-mint);
+  padding-bottom: 0.25em;
+}
+
+/* ===== Code blocks ===== */
+.rst-content .highlight {
+  background: var(--myo-mint) !important;
+  border: 1px solid var(--myo-stroke);
+  border-radius: 4px;
+}
+
+.rst-content .highlight pre {
+  background: transparent !important;
+}
+
+.rst-content code.literal {
+  background: var(--myo-mint);
+  color: var(--myo-dark-teal);
+  border: 1px solid var(--myo-stroke);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+/* ===== Admonitions ===== */
+.rst-content .note {
+  background: var(--myo-mint) !important;
+}
+
+.rst-content .note .admonition-title {
+  background: var(--myo-teal) !important;
+  color: #fff;
+}
+
+.rst-content .warning {
+  background: #fef7e6 !important;
+}
+
+.rst-content .warning .admonition-title {
+  background: #d4a844 !important;
+}
+
+.rst-content .tip,
+.rst-content .hint {
+  background: var(--myo-mint) !important;
+}
+
+.rst-content .tip .admonition-title,
+.rst-content .hint .admonition-title {
+  background: var(--myo-medium) !important;
+  color: var(--myo-dark);
+}
+
+.rst-content .important .admonition-title {
+  background: var(--myo-dark-teal) !important;
+}
+
+.rst-content .important {
+  background: #e8f4f2 !important;
+}
+
+/* ===== Tables ===== */
+.rst-content table.docutils thead {
+  background: var(--myo-dark-teal);
+}
+
+.rst-content table.docutils thead th {
+  color: #fff !important;
+  border-color: rgba(200, 236, 230, 0.3);
+}
+
+.rst-content table.docutils tbody tr:nth-child(even) {
+  background: var(--myo-mint);
+}
+
+.rst-content table.docutils tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+  border-color: var(--myo-stroke) !important;
+}
+
+/* ===== Footer navigation buttons ===== */
+.rst-footer-buttons a {
+  background: var(--myo-teal) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 3px;
+}
+
+.rst-footer-buttons a:hover {
+  background: var(--myo-dark-teal) !important;
+}
+
+/* ===== Search highlight ===== */
+.rst-content .highlighted {
+  background: rgba(60, 170, 170, 0.25);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* ===== Breadcrumb ===== */
+.wy-breadcrumbs li a {
+  color: var(--myo-teal);
+}
+
+.wy-breadcrumbs li a:hover {
+  color: var(--myo-dark-teal);
+}
+
+/* ===== Version selector / mobile header ===== */
+.wy-side-nav-search > div.version {
+  color: var(--myo-medium);
+}
+
+.wy-nav-top {
+  background: var(--myo-dark-teal) !important;
+}
+
+/* ===== Scrollbar (webkit) ===== */
+.wy-nav-side::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wy-nav-side::-webkit-scrollbar-track {
+  background: var(--myo-dark-teal);
+}
+
+.wy-nav-side::-webkit-scrollbar-thumb {
+  background: var(--myo-teal);
+  border-radius: 3px;
+}
+
+.wy-nav-side::-webkit-scrollbar-thumb:hover {
+  background: var(--myo-medium);
+}
