@@ -1,23 +1,26 @@
+from __future__ import annotations
+
 # Source: https://github.dev/aravindr93/mjrl/tree/master/mjrl
 import operator
+from typing import Any
 
 import numpy as np
 
 
-def flatten_tensors(tensors):
+def flatten_tensors(tensors: list[np.ndarray]) -> np.ndarray:
     if len(tensors) > 0:
         return np.concatenate([np.reshape(x, [-1]) for x in tensors])
     else:
         return np.asarray([])
 
 
-def unflatten_tensors(flattened, tensor_shapes):
+def unflatten_tensors(flattened: np.ndarray, tensor_shapes: list[tuple[int, ...]]) -> list[np.ndarray]:
     tensor_sizes = list(map(np.prod, tensor_shapes))
     indices = np.cumsum(tensor_sizes)[:-1]
     return [np.reshape(pair[0], pair[1]) for pair in zip(np.split(flattened, indices), tensor_shapes)]
 
 
-def pad_tensor(x, max_len, mode='zero'):
+def pad_tensor(x: np.ndarray, max_len: int, mode: str = 'zero') -> np.ndarray:
     padding = np.zeros_like(x[0])
     if mode == 'last':
         padding = x[-1]
@@ -27,14 +30,14 @@ def pad_tensor(x, max_len, mode='zero'):
     ])
 
 
-def pad_tensor_n(xs, max_len):
+def pad_tensor_n(xs: np.ndarray, max_len: int) -> np.ndarray:
     ret = np.zeros((len(xs), max_len) + xs[0].shape[1:], dtype=xs[0].dtype)
     for idx, x in enumerate(xs):
         ret[idx][:len(x)] = x
     return ret
 
 
-def pad_tensor_dict(tensor_dict, max_len, mode='zero'):
+def pad_tensor_dict(tensor_dict: dict[str, Any], max_len: int, mode: str = 'zero') -> dict[str, Any]:
     keys = list(tensor_dict.keys())
     ret = dict()
     for k in keys:
@@ -45,7 +48,7 @@ def pad_tensor_dict(tensor_dict, max_len, mode='zero'):
     return ret
 
 
-def flatten_first_axis_tensor_dict(tensor_dict):
+def flatten_first_axis_tensor_dict(tensor_dict: dict[str, Any]) -> dict[str, Any]:
     keys = list(tensor_dict.keys())
     ret = dict()
     for k in keys:
@@ -57,11 +60,11 @@ def flatten_first_axis_tensor_dict(tensor_dict):
     return ret
 
 
-def high_res_normalize(probs):
+def high_res_normalize(probs: list[float]) -> list[float]:
     return [x / sum(map(float, probs)) for x in list(map(float, probs))]
 
 
-def stack_tensor_list(tensor_list):
+def stack_tensor_list(tensor_list: list[np.ndarray]) -> np.ndarray:
     return np.array(tensor_list)
     # tensor_shape = np.array(tensor_list[0]).shape
     # if tensor_shape is tuple():
@@ -69,7 +72,7 @@ def stack_tensor_list(tensor_list):
     # return np.vstack(tensor_list)
 
 
-def stack_tensor_dict_list(tensor_dict_list):
+def stack_tensor_dict_list(tensor_dict_list: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Stack a list of dictionaries of {tensors or dictionary of tensors}.
     :param tensor_dict_list: a list of dictionaries of {tensors or dictionary of tensors}.
@@ -87,12 +90,12 @@ def stack_tensor_dict_list(tensor_dict_list):
     return ret
 
 
-def concat_tensor_list_subsample(tensor_list, f):
+def concat_tensor_list_subsample(tensor_list: list[np.ndarray], f: float) -> np.ndarray:
     return np.concatenate(
         [t[np.random.choice(len(t), int(np.ceil(len(t) * f)), replace=False)] for t in tensor_list], axis=0)
 
 
-def concat_tensor_dict_list_subsample(tensor_dict_list, f):
+def concat_tensor_dict_list_subsample(tensor_dict_list: list[dict[str, Any]], f: float) -> dict[str, Any]:
     keys = list(tensor_dict_list[0].keys())
     ret = dict()
     for k in keys:
@@ -105,11 +108,11 @@ def concat_tensor_dict_list_subsample(tensor_dict_list, f):
     return ret
 
 
-def concat_tensor_list(tensor_list):
+def concat_tensor_list(tensor_list: list[np.ndarray]) -> np.ndarray:
     return np.concatenate(tensor_list, axis=0)
 
 
-def concat_tensor_dict_list(tensor_dict_list):
+def concat_tensor_dict_list(tensor_dict_list: list[dict[str, Any]]) -> dict[str, Any]:
     keys = list(tensor_dict_list[0].keys())
     ret = dict()
     for k in keys:
@@ -122,7 +125,7 @@ def concat_tensor_dict_list(tensor_dict_list):
     return ret
 
 
-def split_tensor_dict_list(tensor_dict):
+def split_tensor_dict_list(tensor_dict: dict[str, Any]) -> list[dict[str, Any]]:
     keys = list(tensor_dict.keys())
     ret = None
     for k in keys:
@@ -137,11 +140,11 @@ def split_tensor_dict_list(tensor_dict):
     return ret
 
 
-def truncate_tensor_list(tensor_list, truncated_len):
+def truncate_tensor_list(tensor_list: list[np.ndarray], truncated_len: int) -> list[np.ndarray]:
     return tensor_list[:truncated_len]
 
 
-def truncate_tensor_dict(tensor_dict, truncated_len):
+def truncate_tensor_dict(tensor_dict: dict[str, Any], truncated_len: int) -> dict[str, Any]:
     ret = dict()
     for k, v in tensor_dict.items():
         if isinstance(v, dict):

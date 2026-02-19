@@ -5,8 +5,11 @@ Source  :: https://github.com/vikashplus/robohive
 License :: Under Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 ================================================="""
 
+from __future__ import annotations
+
 import time
 from collections import deque
+from typing import Any, Callable
 
 import mujoco
 import numpy as np
@@ -46,15 +49,15 @@ class Robot:
         self,
         robot_name: str = "default_robot",
         model_path: str = None,  # model file to create sim
-        mj_model=None,  # pass mj_model directly
+        mj_model: mujoco.MjModel | None = None,  # pass mj_model directly
         config_path: str = None,  # config defining sensors and actuator groups
         act_mode: str = "pos",  # pos / vel
         is_hardware: bool = None,  # use hardware
-        sensor_cache_maxsize=5,  # cache size for sensors
-        noise_scale=0,  # scale for sensor noise
-        random_generator=None,  # random number generator
-        **kwargs,
-    ):
+        sensor_cache_maxsize: int = 5,  # cache size for sensors
+        noise_scale: float = 0,  # scale for sensor noise
+        random_generator: np.random.RandomState | None = None,  # random number generator
+        **kwargs: Any,
+    ) -> None:
 
         if kwargs != {}:
             prompt("Warning: Unused kwargs found: {}".format(kwargs), type=Prompt.WARN)
@@ -121,13 +124,13 @@ class Robot:
         self._sensor_cache_refresh()
 
     # Check if all hardware components are okay
-    def hardware_okay(self, robot_config):
+    def hardware_okay(self, robot_config: dict[str, Any]) -> None:
         for name, device in robot_config.items():
             if not device["robot"].okay():
                 prompt("ERROR: Please check device {}".format(name), "white", "on_red")
 
     # initialize all hardware components
-    def hardware_init(self, robot_config):
+    def hardware_init(self, robot_config: dict[str, Any]) -> dict[str, Any]:
 
         # initalize
         for name, device in robot_config.items():
@@ -224,7 +227,7 @@ class Robot:
         return robot_config
 
     # get hardware sensors
-    def hardware_get_sensors(self):
+    def hardware_get_sensors(self) -> dict[str, Any]:
         current_sensor_value = {}
         current_sensor_value["time"] = time.time() - self.time_start
         for name, device in self.robot_config.items():
@@ -283,7 +286,7 @@ class Robot:
         return current_sensor_value
 
     # apply controls to hardware
-    def hardware_apply_controls(self, control, is_reset=False):
+    def hardware_apply_controls(self, control: np.ndarray, is_reset: bool = False) -> None:
         for name, device in self.robot_config.items():
             if "actuator" in device.keys() and len(device["actuator"]) > 0:
                 if device["interface"]["type"] == "dynamixel":
@@ -342,7 +345,7 @@ class Robot:
                     raise NotImplementedError("ERROR: interface not found")
 
     # close hardware
-    def hardware_close(self):
+    def hardware_close(self) -> bool:
         status = True
         for name, device in self.robot_config.items():
             if device["interface"]["type"] == "dynamixel":
@@ -372,7 +375,7 @@ class Robot:
         return status
 
     # configure robot
-    def configure_robot(self, mj_model, config_path):
+    def configure_robot(self, mj_model: mujoco.MjModel, config_path: str | None) -> dict[str, Any]:
         """
         Read the model xml and robot configs from provided files. Compile config with the model
         """
@@ -438,7 +441,7 @@ class Robot:
         return robot_config
 
     # refresh the sensor cache
-    def _sensor_cache_refresh(self):
+    def _sensor_cache_refresh(self) -> None:
         for _ in range(self._sensor_cache_maxsize):
             self.get_sensors()
 

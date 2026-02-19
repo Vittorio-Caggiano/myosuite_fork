@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """ =================================================
 Copyright (C) 2018 Vikash Kumar
 Author  :: Vikash Kumar (vikashplus@gmail.com)
@@ -16,7 +18,7 @@ class ObsVecDict():
         - initialize() must be called if 'ordered_obs_keys' changes post initialization
     """
     def __init__(self,
-                obsvec_cachesize = 5):
+                obsvec_cachesize: int = 5) -> None:
         self.key_idx = {}
         self.ordered_obs_keys = None
         self.initialized = False
@@ -24,7 +26,7 @@ class ObsVecDict():
         self._obsvec_cache = deque([], maxlen=self._obsvec_cachesize)
 
     # add obsvec to cache
-    def add_obsvec_to_cache(self, t, obsvec, check_timeStamps=True):
+    def add_obsvec_to_cache(self, t: np.ndarray, obsvec: np.ndarray, check_timeStamps: bool = True) -> None:
 
         # replace if new obs with same timestamp
         if check_timeStamps and len(self._obsvec_cache) > 0 and t == self._obsvec_cache[-1][0]:
@@ -36,19 +38,19 @@ class ObsVecDict():
             self._obsvec_cache.append((t, obsvec))
 
     # fetch obsvec from cache
-    def get_obsvec_from_cache(self, index=-1):
+    def get_obsvec_from_cache(self, index: int = -1) -> tuple[np.ndarray, np.ndarray]:
         assert (index>=0 and index<self._obsvec_cachesize) or \
                 (index<0 and index>=-self._obsvec_cachesize), \
                 "cache index out of bound. (cache size is %2d)"%self._obsvec_cachesize
         return self._obsvec_cache[index]
 
     # Flush entire obsvec cache with provided obsvec
-    def obsvec_cache_flush(self, t, obsvec):
+    def obsvec_cache_flush(self, t: np.ndarray, obsvec: np.ndarray) -> None:
         for _ in range(self._obsvec_cachesize):
             self.add_obsvec_to_cache(t, obsvec, check_timeStamps=False)
 
     # initialize dict <> vec mapping
-    def initialize(self, obs_dict, ordered_obs_keys):
+    def initialize(self, obs_dict: dict[str, np.ndarray], ordered_obs_keys: list[str]) -> None:
         base_idx = 0
         assert 'time' in obs_dict.keys(), "obs_dict must have key 'time' with observation timestamp "
         self.ordered_obs_keys = ordered_obs_keys.copy()
@@ -62,19 +64,19 @@ class ObsVecDict():
         self.obsvec_cache_flush(t, obsvec) # populate the cache with initial obsvec  values
 
     # Squeeze out singleton dimensions
-    def squeeze_dims(self, obs_dict):
+    def squeeze_dims(self, obs_dict: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         for key in obs_dict.keys():
             obs_dict[key] = np.squeeze(obs_dict[key])
         return obs_dict
 
     # Exapand observation dimensions to (num_traj=1, horizon=1, obs_dim)
-    def expand_dims(self, obs_dict):
+    def expand_dims(self, obs_dict: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
         for key in obs_dict.keys():
             obs_dict[key] = obs_dict[key][None, None, :]
         return obs_dict
 
     # recover obsvec from obs_dict
-    def obsdict2obsvec(self, obs_dict, ordered_obs_keys):
+    def obsdict2obsvec(self, obs_dict: dict[str, np.ndarray], ordered_obs_keys: list[str]) -> tuple[np.ndarray, np.ndarray]:
         if not self.initialized:
             self.initialize(obs_dict, ordered_obs_keys)
 
@@ -89,7 +91,7 @@ class ObsVecDict():
         return t, obsvec
 
     # recover obs_dict from obsvec
-    def obsvec2obsdict(self, obsvec):
+    def obsvec2obsdict(self, obsvec: np.ndarray) -> dict[str, np.ndarray]:
         assert len(obsvec.shape) == 3, "obsvec should be of shape (num_traj, horizon, obs_dim)"
         assert self.initialized == True, "ObsVecDict has not been initialized. Call initialize() first "
         obs_dict = {}

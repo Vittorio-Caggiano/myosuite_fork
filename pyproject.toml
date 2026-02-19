@@ -48,16 +48,29 @@ mjx = [
     "mediapy>=1.2.0; python_version >= '3.10'",
     "wandb>=0.21.0; python_version >= '3.10'"
 ]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "sphinx-autodoc-typehints>=2.0",
+]
 
 [dependency-groups]
 dev = [
     "pytest>=7.0.0",
     "pytest-xvfb",
+    "pytest-benchmark>=4.0",
     "black",
     "isort",
-    "flake8"
+    "flake8",
+    "mypy>=1.0",
 ]
 
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["myosuite/agents/", "myosuite/tests/"]
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]
@@ -68,7 +81,7 @@ packages = { find = { exclude = ["myosuite.agents"] } }
 py-modules = ["myosuite_init"]
 
 [tool.setuptools.package-data]
-"myosuite" = ["**/*"]
+"myosuite" = ["**/*", "py.typed"]
 
 [project.scripts]
 myoapi_init = "myosuite_init:fetch_simhive"
